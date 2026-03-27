@@ -3,25 +3,38 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
+  Pill, 
+  Clock, 
+  Check, 
   Settings, 
   Plus, 
-  CheckCircle2, 
-  Circle, 
-  Pill, 
-  Activity, 
-  Droplets, 
-  Moon, 
-  Calendar as CalendarIcon, 
-  PlusCircle, 
-  TrendingUp,
-  ChevronLeft,
+  ChevronLeft, 
   ChevronRight,
+  Droplets, 
+  AlertCircle,
+  Calendar,
+  TrendingUp,
+  Activity,
+  CheckCircle2,
+  Circle,
+  Moon,
+  Sun,
   Camera,
+  Bell,
+  Sparkles,
+  Award,
+  BarChart3,
+  User,
   ArrowLeft,
-  Clock,
-  AlertCircle
+  Trophy,
+  ChevronDown,
+  Home,
+  BarChart2,
+  Trash2,
+  Sprout,
+  ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -52,62 +65,91 @@ const INITIAL_MEDS: Medication[] = [
 
 const BottomNav = ({ currentView, setView }: { currentView: View, setView: (v: View) => void }) => {
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 bg-surface/80 dark:bg-surface-container/80 backdrop-blur-2xl rounded-t-[2.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.2)] px-6 pb-8 pt-4 border-t border-outline-variant/10">
-      <div className="max-w-md mx-auto flex justify-around items-center">
-        <button 
-          onClick={() => setView('today')}
-          className={`flex flex-col items-center gap-1 px-6 py-2 rounded-2xl transition-all ${currentView === 'today' ? 'bg-primary/10 text-primary' : 'text-on-surface/40'}`}
-        >
-          <CalendarIcon size={24} fill={currentView === 'today' ? 'currentColor' : 'none'} className={currentView === 'today' ? 'text-primary' : 'text-outline'} />
-          <span className="text-[11px] font-bold">오늘</span>
-        </button>
-        <button 
-          onClick={() => setView('add')}
-          className={`flex flex-col items-center gap-1 px-6 py-2 rounded-2xl transition-all ${currentView === 'add' ? 'bg-primary/10 text-primary' : 'text-on-surface/40'}`}
-        >
-          <PlusCircle size={24} fill={currentView === 'add' ? 'currentColor' : 'none'} className={currentView === 'add' ? 'text-primary' : 'text-outline'} />
-          <span className="text-[11px] font-bold">추가</span>
-        </button>
-        <button 
-          onClick={() => setView('stats')}
-          className={`flex flex-col items-center gap-1 px-6 py-2 rounded-2xl transition-all ${currentView === 'stats' ? 'bg-primary/10 text-primary' : 'text-on-surface/40'}`}
-        >
-          <TrendingUp size={24} fill={currentView === 'stats' ? 'currentColor' : 'none'} className={currentView === 'stats' ? 'text-primary' : 'text-outline'} />
-          <span className="text-[11px] font-bold">통계</span>
-        </button>
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-outline-variant/5 px-6 pb-8 pt-2 max-w-md mx-auto">
+      <div className="flex justify-around items-center">
+        {[
+          { id: 'today', icon: <Calendar size={24} />, label: '오늘' },
+          { id: 'add', icon: <Plus size={28} />, label: '추가' },
+          { id: 'stats', icon: <TrendingUp size={24} />, label: '통계' },
+        ].map((item) => {
+          const isActive = currentView === item.id;
+          return (
+            <button 
+              key={item.id}
+              onClick={() => setView(item.id as View)}
+              className="flex flex-col items-center gap-1 group py-2"
+            >
+              <div className={`w-16 h-14 rounded-[1.5rem] flex items-center justify-center transition-all duration-300 ${
+                isActive ? 'bg-primary/10 text-primary' : 'text-on-surface-variant/40'
+              }`}>
+                {item.icon}
+              </div>
+              <span className={`text-[11px] font-bold transition-colors ${
+                isActive ? 'text-primary' : 'text-on-surface-variant/40'
+              }`}>
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </nav>
   );
 };
 
-const Header = ({ title, showBack, onBack, onSettingsClick }: { title: string, showBack?: boolean, onBack?: () => void, onSettingsClick?: () => void }) => (
-  <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl">
-    <div className="flex justify-between items-center px-6 py-4 max-w-screen-xl mx-auto">
+const Header = ({ 
+  title, 
+  showBack, 
+  onBack, 
+  onSettingsClick,
+  rightElement
+}: { 
+  title: string, 
+  showBack?: boolean, 
+  onBack?: () => void, 
+  onSettingsClick?: () => void,
+  rightElement?: React.ReactNode
+}) => {
+  return (
+    <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl px-6 pt-8 pb-4 flex items-center justify-between max-w-md mx-auto">
       <div className="flex items-center gap-3">
         {showBack ? (
-          <button onClick={onBack} className="p-2 rounded-full hover:bg-surface-container transition-colors">
-            <ArrowLeft size={24} className="text-primary" />
+          <button 
+            onClick={onBack}
+            className="w-10 h-10 rounded-full bg-surface soft-shadow flex items-center justify-center text-on-surface-variant active:scale-90 transition-transform"
+          >
+            <ChevronLeft size={20} />
           </button>
         ) : (
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-primary-container">
-            <img 
-              className="w-full h-full object-cover" 
-              src="https://picsum.photos/seed/alex/100/100" 
-              alt="Profile" 
-              referrerPolicy="no-referrer"
-            />
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg border border-primary/20">
+            A
           </div>
         )}
-        <h1 className="font-headline text-2xl font-extrabold tracking-tight text-primary">{title}</h1>
+        <div>
+          {!showBack && <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest">3월 27일 금요일</p>}
+          <h1 className="text-xl font-black text-primary tracking-tight leading-none">{title}</h1>
+        </div>
       </div>
-      {!showBack && (
-        <button onClick={onSettingsClick} className="p-2 rounded-full hover:bg-surface-container transition-colors">
-          <Settings size={24} className="text-primary" />
-        </button>
-      )}
-    </div>
-  </header>
-);
+      
+      <div className="flex items-center gap-2">
+        {rightElement}
+        {!rightElement && !showBack && (
+          <>
+            <button className="w-10 h-10 rounded-full bg-surface soft-shadow flex items-center justify-center text-on-surface-variant active:scale-90 transition-transform">
+              <Bell size={20} />
+            </button>
+            <button 
+              onClick={onSettingsClick}
+              className="w-10 h-10 rounded-full bg-surface soft-shadow flex items-center justify-center text-on-surface-variant active:scale-90 transition-transform"
+            >
+              <Settings size={20} />
+            </button>
+          </>
+        )}
+      </div>
+    </header>
+  );
+};
 
 const SettingsModal = ({ isOpen, onClose, isDarkMode, onToggleDarkMode, onAlarmClick, alarmTime }: { isOpen: boolean, onClose: () => void, isDarkMode: boolean, onToggleDarkMode: () => void, onAlarmClick: () => void, alarmTime: string }) => {
   return (
@@ -279,111 +321,206 @@ const AlarmTimeModal = ({ isOpen, onClose, time, onSave }: { isOpen: boolean, on
   );
 };
 
-const TodayView = ({ meds, toggleMed, onAddClick }: { meds: Medication[], toggleMed: (id: string) => void, onAddClick: () => void }) => {
+const TodayView = ({ meds, toggleMed, onDelete, onAddClick }: { meds: Medication[], toggleMed: (id: string) => void, onDelete: (id: string) => void, onAddClick: () => void }) => {
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const completedCount = meds.filter(m => m.completed).length;
   const progress = Math.round((completedCount / meds.length) * 100) || 0;
   const remainingCount = meds.length - completedCount;
 
-  const renderSection = (title: string, category: Medication['category']) => {
-    const sectionMeds = meds.filter(m => m.category === category);
-    if (sectionMeds.length === 0 && category === 'evening') {
-      return (
-        <div className="mt-8">
-          <div className="flex items-center gap-4 mb-6 opacity-40">
-            <h3 className="font-label text-xs font-semibold uppercase tracking-widest">저녁</h3>
-            <div className="h-[1px] flex-grow bg-surface-container-highest"></div>
-          </div>
-          <div className="p-8 text-center bg-surface-container-low rounded-[2rem] border border-dashed border-outline-variant/30 flex flex-col items-center gap-2">
-            <Moon size={24} className="text-outline-variant" />
-            <p className="text-xs font-medium text-on-surface-variant">오늘 저녁에 예정된 일정이 없습니다.</p>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="mt-8">
-        <div className="flex items-center gap-4 mb-6">
-          <h3 className={`font-label text-xs font-semibold uppercase tracking-widest ${category === 'morning' ? 'text-secondary' : 'text-primary'}`}>{title}</h3>
-          <div className="h-[1px] flex-grow bg-surface-container-highest opacity-50"></div>
-        </div>
-        <div className="space-y-4">
-          {sectionMeds.map(med => (
-            <motion.div 
-              key={med.id}
-              layout
-              className="bg-surface-container-lowest p-5 rounded-[1.5rem] editorial-shadow flex items-center gap-4 transition-all active:scale-95"
-            >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center overflow-hidden ${med.type === 'capsule' ? 'bg-secondary-container text-on-secondary-container' : med.type === 'pill' ? 'bg-primary-fixed text-on-primary-fixed' : 'bg-tertiary-fixed text-on-tertiary-fixed'}`}>
-                {med.image ? (
-                  <img src={med.image} alt={med.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                ) : (
-                  med.type === 'capsule' ? <Pill size={20} /> : med.type === 'pill' ? <Activity size={20} /> : <Droplets size={20} />
-                )}
-              </div>
-              <div className="flex-grow">
-                <div className="flex justify-between items-start">
-                  <h4 className="font-headline text-lg font-bold text-on-surface">{med.name}</h4>
-                  <span className="font-label text-[10px] font-bold text-outline uppercase tracking-tighter">{med.time}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <p className="text-xs text-on-surface-variant font-medium">{med.dosage}</p>
-                  <span className="text-[10px] text-outline">•</span>
-                  <p className="text-[10px] font-bold text-primary uppercase tracking-wider">잔여: {med.remainingQuantity}개</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => toggleMed(med.id)}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${med.completed ? 'bg-primary/10 text-primary' : 'bg-surface-container border border-outline-variant/20 text-outline-variant'}`}
-              >
-                {med.completed ? <CheckCircle2 size={24} fill="currentColor" className="text-primary" /> : <Circle size={24} />}
-              </button>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const currentDate = new Date().toLocaleDateString('ko-KR', {
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  });
+  const groupedMeds = meds.reduce((acc, med) => {
+    const time = med.category === 'morning' ? '아침' : med.category === 'lunch' ? '점심' : '저녁';
+    if (!acc[time]) acc[time] = [];
+    acc[time].push(med);
+    return acc;
+  }, {} as Record<string, Medication[]>);
 
   return (
-    <div className="pt-24 px-6 pb-32 max-w-md mx-auto">
-      <section className="mb-10">
-        <p className="font-label text-xs font-semibold uppercase tracking-wider text-primary mb-1">{currentDate}</p>
-        <h2 className="font-headline text-4xl font-extrabold tracking-tight leading-tight">좋은 아침이에요,<br />알렉스님</h2>
+    <div className="pt-24 px-6 pb-32 max-w-md mx-auto flex flex-col gap-6">
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteId && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-on-surface/20 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="bg-surface-container-lowest w-full max-w-xs rounded-[2.5rem] p-8 space-y-6 shadow-2xl border border-outline-variant/10"
+            >
+              <div className="text-center space-y-2">
+                <div className="w-16 h-16 rounded-2xl bg-error/10 text-error flex items-center justify-center mx-auto mb-4">
+                  <Trash2 size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-on-surface">정말 삭제할까요?</h3>
+                <p className="text-sm text-on-surface-variant opacity-60">삭제된 정보는 복구할 수 없습니다.</p>
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setDeleteId(null)}
+                  className="flex-1 py-4 rounded-2xl bg-surface-container text-on-surface font-bold text-sm active:scale-95 transition-all"
+                >
+                  취소
+                </button>
+                <button 
+                  onClick={() => {
+                    onDelete(deleteId);
+                    setDeleteId(null);
+                  }}
+                  className="flex-1 py-4 rounded-2xl bg-error text-white font-bold text-sm active:scale-95 transition-all shadow-lg shadow-error/20"
+                >
+                  삭제
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Dashboard Card */}
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#6366F1] to-[#3B82F6] dark:from-[#6366F1]/80 dark:to-[#3B82F6]/80 p-8 text-white editorial-shadow border border-white/10">
+        {/* Decorative Circles */}
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+        <div className="absolute -bottom-10 right-20 w-32 h-32 bg-white/5 rounded-full blur-xl" />
         
-        <div className="mt-8 p-6 rounded-[2rem] bg-gradient-to-br from-primary to-primary-container text-on-primary editorial-shadow relative overflow-hidden">
-          <div className="relative z-10">
-            <p className="font-label text-[11px] font-semibold uppercase tracking-widest opacity-80">일일 달성도</p>
-            <div className="flex items-end gap-2 mt-1">
-              <span className="font-headline text-5xl font-bold">{progress}</span>
-              <span className="font-headline text-2xl font-bold opacity-70 mb-1.5">%</span>
-            </div>
-            <p className="mt-4 text-sm font-medium opacity-90">
-              {progress === 100 ? "대단해요! 오늘의 모든 약을 복용했습니다." : `거의 다 왔어요! 오늘 남은 약은 ${remainingCount}개입니다.`}
-            </p>
+        <div className="relative z-10">
+          <p className="text-sm font-medium opacity-80 mb-2">오늘의 달성률</p>
+          <div className="flex items-baseline gap-1 mb-1">
+            <span className="text-6xl font-black tracking-tighter">{progress}</span>
+            <span className="text-2xl font-bold opacity-80">%</span>
           </div>
-          <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+          <p className="text-sm font-medium mb-6">아직 {remainingCount}개가 남았어요</p>
+          
+          <div className="w-full h-3 bg-white/20 rounded-full mb-4 overflow-hidden">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              className="h-full bg-white rounded-full"
+            />
+          </div>
+          
+          <div className="flex items-center justify-between text-xs font-bold">
+            <span className="opacity-80">{completedCount}/{meds.length} 복용</span>
+            <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1">
+              <span>연속 7일</span>
+              <span>🔥</span>
+            </div>
+          </div>
         </div>
-      </section>
+        
+        <div className="absolute top-6 right-6 w-20 h-20 bg-white/15 rounded-[2rem] flex items-center justify-center backdrop-blur-md border border-white/10">
+          <Sparkles size={32} className="text-white/60" />
+        </div>
+      </div>
 
-      <section>
-        {renderSection('아침', 'morning')}
-        {renderSection('점심', 'lunch')}
-        {renderSection('저녁', 'evening')}
-      </section>
+      {/* Mini Stat Cards */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: '오늘', value: `${completedCount}/${meds.length}`, icon: <Pill size={18} className="text-primary" /> },
+          { label: '이번주', value: '94%', icon: <TrendingUp size={18} className="text-secondary" /> },
+          { label: '잔여일', value: '15일', icon: <Clock size={18} className="text-tertiary" /> },
+        ].map((stat, i) => (
+          <div key={i} className="bg-surface rounded-[1.5rem] p-4 soft-shadow flex flex-col gap-2 border border-outline-variant/10">
+            <div className="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center">
+              {stat.icon}
+            </div>
+            <div>
+              <p className="text-lg font-bold text-on-surface tracking-tight">{stat.value}</p>
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">{stat.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
 
+      {/* Medication List */}
+      <div className="flex flex-col gap-8 mt-2">
+        {['아침', '점심', '저녁'].map((timeLabel) => {
+          const sectionMeds = groupedMeds[timeLabel] || [];
+          if (sectionMeds.length === 0 && timeLabel === '저녁') return null;
+          
+          return (
+            <div key={timeLabel}>
+              <div className="flex items-center justify-between mb-4 px-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{timeLabel === '아침' ? '🌅' : timeLabel === '점심' ? '☀️' : '🌙'}</span>
+                  <h3 className="text-base font-bold text-on-surface">{timeLabel}</h3>
+                </div>
+                <span className="text-xs font-bold text-on-surface-variant opacity-40">
+                  {sectionMeds.filter(m => m.completed).length}/{sectionMeds.length}
+                </span>
+              </div>
+              
+              <div className="space-y-4">
+                {sectionMeds.map((med) => (
+                  <motion.div
+                    key={med.id}
+                    layout
+                    className={`relative overflow-hidden rounded-[2rem] bg-surface soft-shadow p-5 flex items-center gap-4 border-l-[6px] transition-all active:scale-[0.98] border-outline-variant/10 ${
+                      med.category === 'morning' ? 'border-l-primary' : 
+                      med.category === 'lunch' ? 'border-l-secondary' : 'border-l-tertiary'
+                    }`}
+                  >
+            <div className="w-14 h-14 rounded-2xl bg-surface-container flex items-center justify-center overflow-hidden flex-shrink-0 border border-outline-variant/10">
+                      {med.image ? (
+                        <img src={med.image} alt={med.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="text-primary/40 text-2xl">
+                          {med.type === 'pill' ? '💊' : med.type === 'capsule' ? '💊' : '💧'}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <h4 className={`text-base font-bold truncate ${med.completed ? 'text-on-surface-variant/30 line-through' : 'text-on-surface'}`}>
+                          {med.name}
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-on-surface-variant opacity-50 uppercase">{med.time}</span>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteId(med.id);
+                            }}
+                            className="p-1 text-on-surface-variant/20 hover:text-error transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-[11px] font-bold text-on-surface-variant opacity-60">
+                        <span>{med.dosageAmount}정 · {med.dosage}</span>
+                        <span className="text-secondary">잔여 {med.remainingQuantity}개</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => toggleMed(med.id)}
+                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${
+                        med.completed 
+                          ? 'bg-primary text-white scale-110' 
+                          : 'bg-surface-container text-transparent'
+                      }`}
+                    >
+                      <Check size={20} strokeWidth={3} />
+                    </button>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Floating Action Button */}
       <div className="fixed bottom-32 right-6 z-50">
         <button 
           onClick={onAddClick}
-          className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-[0_12px_32px_rgba(0,98,142,0.3)] flex items-center justify-center active:scale-90 transition-transform"
+          className="w-16 h-16 rounded-[1.5rem] bg-primary text-white shadow-lg shadow-primary/30 flex items-center justify-center active:scale-90 transition-transform"
         >
-          <Plus size={32} />
+          <Plus size={32} strokeWidth={3} />
         </button>
       </div>
     </div>
@@ -530,9 +667,10 @@ const TimePickerModal = ({
 const AddMedicationView = ({ onBack, onSave, isTimePickerOpen, setIsTimePickerOpen }: { onBack: () => void, onSave: (med: Medication) => void, isTimePickerOpen: boolean, setIsTimePickerOpen: (o: boolean) => void }) => {
   const [name, setName] = useState('');
   const [time, setTime] = useState('08:00');
-  const [selectedDays, setSelectedDays] = useState<number[]>([0, 2, 4]);
+  const [selectedDays, setSelectedDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [dosage, setDosage] = useState('1');
   const [remaining, setRemaining] = useState('30');
+  const [type, setType] = useState<'pill' | 'capsule' | 'liquid'>('pill');
   const [image, setImage] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -548,30 +686,23 @@ const AddMedicationView = ({ onBack, onSave, isTimePickerOpen, setIsTimePickerOp
   };
 
   const handleSave = () => {
-    if (!name.trim()) {
-      alert('약 이름을 입력해주세요.');
-      return;
-    }
+    if (!name.trim()) return;
     
     const h = parseInt(time.split(':')[0]);
     let category: Medication['category'] = 'morning';
     if (h >= 11 && h < 16) category = 'lunch';
     if (h >= 16) category = 'evening';
 
-    // Clean up dosage and remaining strings
-    const cleanDosage = dosage.includes('정') || dosage.includes('캡슐') ? dosage : `${dosage}정`;
-    const cleanRemaining = remaining.includes('정') || remaining.includes('개') ? remaining : `${remaining}정`;
-
     const newMed: Medication = {
       id: Math.random().toString(36).substr(2, 9),
       name: name.trim(),
-      dosage: cleanDosage,
+      dosage: `${dosage}정`,
       dosageAmount: parseInt(dosage) || 1,
       remainingQuantity: parseInt(remaining) || 0,
       time: formatTimeDisplay(time),
       category,
       completed: false,
-      type: 'pill',
+      type,
       image: image || undefined
     };
     onSave(newMed);
@@ -593,138 +724,181 @@ const AddMedicationView = ({ onBack, onSave, isTimePickerOpen, setIsTimePickerOp
   };
 
   return (
-    <div className="pt-24 pb-32 px-6 max-w-md mx-auto">
-      <div className="space-y-10">
-        <section className="space-y-4">
-          <label className="font-label text-xs font-semibold uppercase tracking-wider text-outline px-1">약 이름</label>
-          <div className="relative group">
+    <div className="pt-24 pb-40 px-6 max-w-md mx-auto flex flex-col gap-8">
+      {/* Header Info */}
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={onBack}
+          className="w-12 h-12 rounded-full bg-surface soft-shadow flex items-center justify-center text-on-surface-variant active:scale-90 transition-transform"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <div>
+          <h2 className="text-2xl font-black text-on-surface tracking-tight">새 약 추가</h2>
+          <p className="text-xs font-bold text-on-surface-variant/40">복용 정보를 입력해주세요</p>
+        </div>
+      </div>
+
+      {/* Form Sections */}
+      <div className="flex flex-col gap-6">
+        {/* Name Section */}
+        <div className="bg-surface rounded-[2rem] p-6 soft-shadow space-y-4">
+          <p className="text-[10px] font-bold text-primary uppercase tracking-widest">약 이름</p>
+          <div className="flex items-center gap-4 bg-surface-container/30 rounded-2xl px-4 py-3 border border-outline-variant/20">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+              <Pill size={20} />
+            </div>
             <input 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-surface-container-low border-none rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all text-on-surface placeholder:text-outline-variant font-medium" 
-              placeholder="예: 마그네슘" 
-              type="text" 
+              placeholder="예: 마그네슘, 종합비타민..."
+              className="flex-1 bg-transparent border-none outline-none font-bold text-on-surface placeholder:text-on-surface-variant/20"
             />
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              <Pill className="text-outline-variant" size={20} />
-            </div>
           </div>
-        </section>
+        </div>
 
-        <section className="space-y-4">
-          <label className="font-label text-xs font-semibold uppercase tracking-wider text-outline px-1">시간 및 일정</label>
-          <div className="bg-surface-container-low rounded-3xl p-6 space-y-8">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <span className="text-on-surface font-bold text-lg">알림 시간</span>
-                <p className="text-xs text-outline">알림을 받을 시간을 설정하세요</p>
-              </div>
-              <button 
-                onClick={() => setIsTimePickerOpen(true)}
-                className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity"
+        {/* Type Section */}
+        <div className="bg-surface rounded-[2rem] p-6 soft-shadow space-y-4">
+          <p className="text-[10px] font-bold text-primary uppercase tracking-widest">약 유형</p>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { id: 'pill', label: '알약', icon: '💊' },
+              { id: 'capsule', label: '캡슐', icon: '💊' },
+              { id: 'liquid', label: '액상', icon: '💧' },
+            ].map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setType(t.id as any)}
+                className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all ${
+                  type === t.id ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-container/30 text-on-surface-variant/60'
+                }`}
               >
-                <span className="font-headline text-3xl font-extrabold">{formatTimeDisplay(time)}</span>
-                <Clock size={24} />
+                <span className="text-2xl">{t.icon}</span>
+                <span className="text-xs font-bold">{t.label}</span>
               </button>
-            </div>
-            
-            <div className="space-y-4">
-              <span className="text-xs font-semibold text-outline">반복 요일</span>
-              <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-4 -mx-2 px-2">
-                {['월', '화', '수', '목', '금', '토', '일'].map((day, i) => (
-                  <button 
-                    key={day}
-                    onClick={() => toggleDay(i)}
-                    className={`shrink-0 w-14 py-4 rounded-2xl font-bold text-sm transition-all active:scale-95 ${selectedDays.includes(i) ? 'bg-primary text-on-primary shadow-lg shadow-primary/20' : 'bg-surface-container-highest text-on-surface-variant'}`}
-                  >
-                    {day}
-                  </button>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
-        </section>
+        </div>
 
-        <section className="space-y-4">
-          <label className="font-label text-xs font-semibold uppercase tracking-wider text-outline px-1">복용 상세 정보</label>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-surface-container-low p-5 rounded-3xl flex items-center gap-4 transition-all hover:bg-surface-container-highest group">
-              <div className="w-12 h-12 rounded-2xl bg-secondary-container/30 flex items-center justify-center shrink-0">
-                <Pill size={24} className="text-secondary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="block text-[10px] text-outline font-bold uppercase tracking-widest mb-1">복용량</span>
-                <input 
-                  value={dosage}
-                  onChange={(e) => setDosage(e.target.value)}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 font-headline text-xl font-extrabold text-on-surface placeholder:text-outline-variant"
-                  placeholder="예: 1정"
-                />
-              </div>
-            </div>
-            <div className="bg-surface-container-low p-5 rounded-3xl flex items-center gap-4 transition-all hover:bg-surface-container-highest group">
-              <div className="w-12 h-12 rounded-2xl bg-tertiary-fixed/30 flex items-center justify-center shrink-0">
-                <Activity size={24} className="text-tertiary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="block text-[10px] text-outline font-bold uppercase tracking-widest mb-1">잔여량</span>
-                <input 
-                  value={remaining}
-                  onChange={(e) => setRemaining(e.target.value)}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 font-headline text-xl font-extrabold text-on-surface placeholder:text-outline-variant"
-                  placeholder="예: 30정"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-4">
-          <div className="bg-surface-container-lowest rounded-3xl p-6 border border-outline-variant/10">
-            <div className="flex items-center gap-4 mb-6">
-              {image ? (
-                <img 
-                  src={image} 
-                  alt="Preview" 
-                  className="w-16 h-16 rounded-2xl object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center text-outline-variant">
-                  <Camera size={32} />
+        {/* Time Section */}
+        <div className="bg-surface rounded-[2rem] p-6 soft-shadow space-y-4">
+          <p className="text-[10px] font-bold text-primary uppercase tracking-widest">복용 시간</p>
+          <div className="flex flex-col gap-2">
+            {[
+              { label: '아침 (08:00)', time: '08:00', icon: '🌅' },
+              { label: '점심 (13:00)', time: '13:00', icon: '☀️' },
+              { label: '저녁 (19:00)', time: '19:00', icon: '🌙' },
+            ].map((item) => (
+              <button
+                key={item.time}
+                onClick={() => setTime(item.time)}
+                className={`flex items-center justify-between p-4 rounded-2xl transition-all border-2 ${
+                  time === item.time ? 'border-primary bg-primary/5' : 'border-transparent bg-surface-container/30'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{item.icon}</span>
+                  <span className="font-bold text-on-surface">{item.label}</span>
                 </div>
-              )}
-              <div>
-                <span className="text-sm font-bold text-on-surface block">시각적 구분</span>
-                <p className="text-xs text-outline">선택사항: 빠른 식별을 도와줍니다</p>
+                <div className={`w-4 h-4 rounded-full ${time === item.time ? 'bg-primary' : 'bg-surface-container-highest'}`} />
+              </button>
+            ))}
+            <button 
+              onClick={() => setIsTimePickerOpen(true)}
+              className="flex items-center justify-between p-4 rounded-2xl bg-surface-container/30 text-on-surface-variant/60"
+            >
+              <div className="flex items-center gap-3">
+                <Clock size={20} />
+                <span className="font-bold">직접 설정</span>
               </div>
-            </div>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleImageChange} 
-              accept="image/*" 
-              className="hidden" 
-            />
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full py-3 rounded-xl bg-surface-container-highest text-primary font-bold text-sm hover:bg-surface-variant transition-colors flex items-center justify-center gap-2"
-            >
-              <Camera size={18} /> {image ? '사진 변경' : '사진 업데이트'}
-            </button>
-          </div>
-        </section>
-
-        <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-background via-background to-transparent pt-12 z-50">
-          <div className="max-w-md mx-auto">
-            <button 
-              onClick={handleSave}
-              className="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary py-5 rounded-2xl font-headline font-bold text-lg shadow-[0_12px_40px_-12px_rgba(0,98,142,0.4)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
-            >
-              <CheckCircle2 size={24} /> 약 저장하기
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>
+
+        {/* Days Section */}
+        <div className="bg-surface rounded-[2rem] p-6 soft-shadow space-y-4">
+          <p className="text-[10px] font-bold text-primary uppercase tracking-widest">반복 요일</p>
+          <div className="flex justify-between">
+            {['월', '화', '수', '목', '금', '토', '일'].map((day, i) => (
+              <button 
+                key={day}
+                onClick={() => toggleDay(i)}
+                className={`w-10 h-10 rounded-xl font-bold text-xs transition-all ${
+                  selectedDays.includes(i) ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-container/30 text-on-surface-variant/40'
+                }`}
+              >
+                {day}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Dosage & Remaining Section */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-surface rounded-[2rem] p-6 soft-shadow space-y-4 border border-outline-variant/10">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-error/10 flex items-center justify-center text-error">
+                <Pill size={16} />
+              </div>
+              <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest">복용량</p>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <input 
+                value={dosage}
+                onChange={(e) => setDosage(e.target.value)}
+                className="w-full bg-transparent border-none outline-none font-black text-3xl text-on-surface"
+              />
+              <span className="text-sm font-bold text-on-surface-variant/40">정</span>
+            </div>
+          </div>
+          <div className="bg-surface rounded-[2rem] p-6 soft-shadow space-y-4 border border-outline-variant/10">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+                <Activity size={16} />
+              </div>
+              <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest">잔여량</p>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <input 
+                value={remaining}
+                onChange={(e) => setRemaining(e.target.value)}
+                className="w-full bg-transparent border-none outline-none font-black text-3xl text-on-surface"
+              />
+              <span className="text-sm font-bold text-on-surface-variant/40">개</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Photo Section */}
+        <div 
+          onClick={() => fileInputRef.current?.click()}
+          className="bg-surface rounded-[2rem] p-6 soft-shadow flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-surface-container/30 flex items-center justify-center text-on-surface-variant/40 overflow-hidden">
+              {image ? <img src={image} className="w-full h-full object-cover" /> : <Camera size={24} />}
+            </div>
+            <div>
+              <p className="text-sm font-bold text-on-surface">사진 추가</p>
+              <p className="text-[10px] font-medium text-on-surface-variant/40">약을 빠르게 구분하는 데 도움돼요</p>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-on-surface-variant/20" />
+          <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
+        </div>
+      </div>
+
+      {/* Save Button */}
+      <div className="fixed bottom-32 left-0 right-0 px-6 max-w-md mx-auto">
+        <button 
+          onClick={handleSave}
+          disabled={!name.trim()}
+          className="w-full bg-gradient-to-r from-primary-container to-primary dark:from-primary dark:to-primary-container text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-primary/30 active:scale-95 transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2"
+        >
+          <CheckCircle2 size={24} />
+          약 저장하기
+        </button>
       </div>
 
       <AnimatePresence>
@@ -741,136 +915,136 @@ const AddMedicationView = ({ onBack, onSave, isTimePickerOpen, setIsTimePickerOp
   );
 };
 const StatsView = ({ meds }: { meds: Medication[] }) => {
-  const lowMeds = meds.filter(m => m.remainingQuantity < 10); // 10개 미만일 때 알림
-
-  const currentYearMonth = new Date().toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-  });
+  const completionRate = 94; // Mock data for design
+  const weeklyData = [
+    { day: '월', rate: 100 },
+    { day: '화', rate: 85 },
+    { day: '수', rate: 100 },
+    { day: '목', rate: 90 },
+    { day: '금', rate: 100 },
+    { day: '토', rate: 70 },
+    { day: '일', rate: 0 },
+  ];
 
   return (
-    <div className="pt-24 pb-32 px-6 max-w-md mx-auto space-y-8">
-      <section className="space-y-4">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight">통계</h2>
-          <span className="font-label text-xs font-semibold uppercase tracking-wider text-primary">월간 요약</span>
-        </div>
-        <div className="p-6 rounded-[2rem] bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-xl overflow-hidden relative">
-          <div className="relative z-10">
-            <p className="font-label text-xs font-semibold uppercase tracking-widest opacity-80">전체 복용 이행률</p>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="font-headline text-5xl font-extrabold tracking-tighter">94%</span>
-              <span className="font-body text-sm opacity-90">지난달 대비 +2%</span>
-            </div>
-            <div className="mt-6 h-3 bg-white/20 rounded-full overflow-hidden">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: '94%' }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className="h-full bg-white rounded-full"
-              />
+    <div className="pt-24 pb-40 px-6 max-w-md mx-auto flex flex-col gap-8">
+      {/* Monthly Summary Card */}
+      <div className="bg-surface rounded-[2.5rem] p-8 soft-shadow space-y-8 border border-outline-variant/10">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest">전체 복용 이행률</p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-4xl font-black text-on-surface">{completionRate}%</h3>
+              <span className="text-xs font-bold text-success">+2% 향상</span>
             </div>
           </div>
-          <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="relative w-20 h-20">
+            <svg className="w-full h-full -rotate-90">
+              <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" strokeWidth="8" className="text-surface-container" />
+              <circle cx="40" cy="40" r="36" fill="none" stroke="currentColor" strokeWidth="8" strokeDasharray={`${2 * Math.PI * 36}`} strokeDashoffset={`${2 * Math.PI * 36 * (1 - completionRate / 100)}`} className="text-primary" strokeLinecap="round" />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Trophy size={20} className="text-primary" />
+            </div>
+          </div>
         </div>
-      </section>
 
-      <section className="space-y-4">
-        <h3 className="font-headline text-lg font-bold text-on-surface">주간 연속 기록</h3>
-        <div className="flex gap-4 overflow-x-auto hide-scrollbar bg-surface-container-lowest p-6 rounded-[2rem] shadow-sm -mx-1 px-5">
-          {['월', '화', '수', '목', '금', '토', '일'].map((day, i) => (
-            <div key={day} className="flex flex-col items-center gap-2 shrink-0">
-              <span className={`font-label text-[10px] font-bold uppercase tracking-tighter ${i === 4 ? 'text-primary' : 'text-outline'}`}>{day}</span>
-              {i < 3 ? (
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                  <CheckCircle2 size={18} fill="currentColor" />
-                </div>
-              ) : i === 4 ? (
-                <div className="w-12 h-12 rounded-full bg-primary text-on-primary shadow-lg shadow-primary/20 flex items-center justify-center">
-                  <span className="font-bold text-xs">오늘</span>
-                </div>
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-outline-variant">
-                  <span className="font-bold text-xs">{day === '토' || day === '일' ? 'S' : <Circle size={18} />}</span>
-                </div>
-              )}
+        <div className="h-2 bg-surface-container rounded-full overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${completionRate}%` }}
+            className="h-full bg-gradient-to-r from-primary to-secondary"
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { label: '연속 달성', value: '7일', icon: '🔥', color: 'bg-primary/10 text-primary' },
+            { label: '총 복용', value: '124회', icon: '💊', color: 'bg-secondary/10 text-secondary' },
+            { label: '최고 기록', value: '28일', icon: '⭐', color: 'bg-tertiary/10 text-tertiary' },
+          ].map((stat) => (
+            <div key={stat.label} className="flex flex-col items-center gap-2">
+              <div className={`w-10 h-10 rounded-xl ${stat.color} flex items-center justify-center text-lg`}>
+                {stat.icon}
+              </div>
+              <p className="text-[10px] font-bold text-on-surface-variant/40">{stat.label}</p>
+              <p className="text-sm font-black text-on-surface">{stat.value}</p>
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      <section className="space-y-4">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="font-headline text-lg font-bold text-on-surface">복용 기록</h3>
-          <div className="flex gap-2">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-primary/30"></div>
-              <span className="text-[10px] font-semibold text-outline uppercase tracking-tighter">완료</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-surface-container-highest"></div>
-              <span className="text-[10px] font-semibold text-outline uppercase tracking-tighter">미복용</span>
-            </div>
+      {/* Weekly Activity Card */}
+      <div className="bg-surface rounded-[2.5rem] p-8 soft-shadow space-y-6 border border-outline-variant/10">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest">주간 복용률</p>
+            <h3 className="text-xl font-black text-on-surface">7일 연속 달성 중!</h3>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center text-success">
+            <TrendingUp size={20} />
           </div>
         </div>
-        <div className="bg-surface-container-lowest p-6 rounded-[2rem] shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <button className="p-2 hover:bg-surface-container rounded-full transition-colors"><ChevronLeft size={20} /></button>
-            <span className="font-headline font-bold text-primary">{currentYearMonth}</span>
-            <button className="p-2 hover:bg-surface-container rounded-full transition-colors"><ChevronRight size={20} /></button>
-          </div>
-          <div className="grid grid-cols-7 gap-y-4 text-center">
-            {['월', '화', '수', '목', '금', '토', '일'].map(d => (
-              <div key={d} className="font-label text-[10px] font-bold text-outline/60 uppercase">{d}</div>
-            ))}
-            {Array.from({ length: 31 }).map((_, i) => {
-              const day = i + 1;
-              const isMissed = day === 5;
-              const isCompleted = day < 14 && day !== 5;
-              const isToday = day === 14;
-              
-              return (
-                <div key={i} className="py-2 flex items-center justify-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                    isMissed ? 'bg-surface-container-highest text-outline-variant' : 
-                    isCompleted ? 'bg-primary/15 text-primary' : 
-                    isToday ? 'bg-primary text-on-primary ring-4 ring-primary/20' : 
-                    'text-outline/40'
-                  }`}>
-                    {day}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
-      <section className="space-y-4">
-        <h3 className="font-headline text-lg font-bold text-on-surface">잔여량 알림</h3>
-        <div className="space-y-3">
-          {lowMeds.length > 0 ? (
-            lowMeds.map(med => (
-              <div key={med.id} className="bg-surface-container-low p-4 rounded-2xl flex items-center gap-4 border border-error/10">
-                <div className="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center text-error shrink-0">
+        <div className="flex items-end justify-between h-32 pt-4">
+          {weeklyData.map((data) => (
+            <div key={data.day} className="flex flex-col items-center gap-3 flex-1">
+              <div className="relative w-full flex justify-center items-end h-full">
+                <motion.div 
+                  initial={{ height: 0 }}
+                  animate={{ height: `${data.rate}%` }}
+                  className={`w-3 rounded-full ${data.rate === 100 ? 'bg-primary' : 'bg-surface-container-high'}`}
+                />
+              </div>
+              <span className="text-[10px] font-bold text-on-surface-variant/40">{data.day}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Achievements Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-2">
+          <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest">달성 뱃지</p>
+          <button className="text-[10px] font-bold text-primary">전체보기</button>
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar">
+          {[
+            { name: '꾸준함의 정석', icon: <Trophy className="w-8 h-8 text-white" strokeWidth={1.5} />, color: 'from-yellow-400 to-orange-500' },
+            { name: '첫 걸음', icon: <Sprout className="w-8 h-8 text-white" strokeWidth={1.5} />, color: 'from-green-400 to-emerald-600' },
+            { name: '건강 지킴이', icon: <ShieldCheck className="w-8 h-8 text-white" strokeWidth={1.5} />, color: 'from-blue-400 to-indigo-600' },
+            { name: '완벽한 한 주', icon: <Sparkles className="w-8 h-8 text-white" strokeWidth={1.5} />, color: 'from-purple-400 to-pink-600' },
+          ].map((badge) => (
+            <div key={badge.name} className="flex-shrink-0 flex flex-col items-center gap-2">
+              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${badge.color} flex items-center justify-center shadow-lg shadow-black/5`}>
+                {badge.icon}
+              </div>
+              <p className="text-[10px] font-bold text-on-surface-variant/60">{badge.name}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Low Medication Alerts */}
+      <div className="space-y-4">
+        <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest px-2">잔여량 부족 알림</p>
+        <div className="flex flex-col gap-3">
+          {meds.filter(m => m.remainingQuantity < 5).map(med => (
+            <div key={med.id} className="bg-error/10 rounded-2xl p-4 flex items-center justify-between border border-error/20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center text-error">
                   <AlertCircle size={20} />
                 </div>
-                <div className="flex-grow">
-                  <h4 className="font-bold text-on-surface text-sm">{med.name}</h4>
-                  <p className="text-[11px] text-error font-semibold">잔여량이 {med.remainingQuantity}개 남았습니다.</p>
+                <div>
+                  <h4 className="text-sm font-bold text-on-surface">{med.name}</h4>
+                  <p className="text-[10px] font-medium text-error">잔여량이 {med.remainingQuantity}개 남았습니다</p>
                 </div>
-                <button className="px-3 py-1.5 bg-surface-container-highest rounded-lg text-[10px] font-bold text-primary uppercase tracking-wider">
-                  충전하기
-                </button>
               </div>
-            ))
-          ) : (
-            <div className="bg-surface-container-low p-8 rounded-[2rem] text-center">
-              <p className="text-xs text-outline font-medium">모든 약의 잔여량이 충분합니다.</p>
+              <button className="px-4 py-2 rounded-xl bg-error text-white text-xs font-bold">구매하기</button>
             </div>
-          )}
+          ))}
         </div>
-      </section>
+      </div>
     </div>
   );
 };
@@ -922,6 +1096,10 @@ export default function App() {
     }));
   };
 
+  const deleteMed = (id: string) => {
+    setMeds(prev => prev.filter(m => m.id !== id));
+  };
+
   const currentTitle = {
     today: '필플로우',
     add: '새로운 복용 추가',
@@ -932,12 +1110,18 @@ export default function App() {
 
   return (
     <div className={`h-screen bg-background pb-32 overflow-x-hidden ${isAnyModalOpen ? 'overflow-hidden' : 'overflow-y-auto'}`}>
-      <Header 
-        title={currentTitle} 
-        showBack={view === 'add'} 
-        onBack={() => setView('today')} 
-        onSettingsClick={() => setIsSettingsOpen(true)}
-      />
+      {view !== 'add' && (
+        <Header 
+          title={view === 'today' ? '필플로우' : '통계'} 
+          showBack={false} 
+          onSettingsClick={() => setIsSettingsOpen(true)}
+          rightElement={view === 'stats' ? (
+            <button className="px-4 py-2 rounded-full bg-surface soft-shadow flex items-center gap-2 text-[10px] font-bold text-on-surface-variant">
+              2026년 3월 <ChevronDown size={12} />
+            </button>
+          ) : undefined}
+        />
+      )}
       
       <main className="relative z-0">
         <AnimatePresence mode="wait">
@@ -949,7 +1133,7 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <TodayView meds={meds} toggleMed={toggleMed} onAddClick={() => setView('add')} />
+              <TodayView meds={meds} toggleMed={toggleMed} onDelete={deleteMed} onAddClick={() => setView('add')} />
             </motion.div>
           )}
           {view === 'add' && (
